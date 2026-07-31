@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.NoticeMapper">
+
+    <!-- 查询所有公告 -->
+    <select id="selectAllNotices" resultType="com.zjsru.entity.vo.NoticeVO">
+        SELECT id, title, category, type,
+               DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+               author, content
+        FROM sys_notice
+        ORDER BY date DESC
+    </select>
+
+    <!-- 查询单条详情 -->
+    <select id="selectNoticeById" resultType="com.zjsru.entity.vo.NoticeVO">
+        SELECT id, title, category, type,
+               DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+               author, content
+        FROM sys_notice
+        WHERE id = #{id}
+    </select>
+
+</mapper>

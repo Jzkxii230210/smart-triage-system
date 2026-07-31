@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.ConsultationMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.zjsru.entity.ConsultationMessage">
+        <id column="id" property="id" />
+        <result column="consultation_id" property="consultationId" />
+        <result column="sender_role" property="senderRole" />
+        <result column="content" property="content" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 查询历史记录 -->
+    <select id="selectByConsultationId" resultMap="BaseResultMap">
+        SELECT *
+        FROM sys_consultation_message
+        WHERE consultation_id = #{consultationId}
+        ORDER BY create_time
+    </select>
+
+    <insert id="insert" parameterType="com.zjsru.entity.ConsultationMessage"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_consultation_message
+            (consultation_id, sender_role, content, create_time)
+        VALUES
+            (#{consultationId}, #{senderRole}, #{content}, #{createTime})
+    </insert>
+
+</mapper>

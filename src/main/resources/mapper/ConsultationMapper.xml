@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.ConsultationMapper">
+
+    <resultMap id="BaseResultMap" type="com.zjsru.entity.Consultation">
+        <id column="id" property="id" />
+        <result column="patient_id" property="patientId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="patient_name" property="patientName" />
+        <result column="doctor_name" property="doctorName" />
+        <result column="content" property="content" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="appointment_id" property="appointmentId" />
+    </resultMap>
+
+    <select id="selectListByDoctorId" resultMap="BaseResultMap">
+        SELECT *
+        FROM sys_consultation
+        WHERE doctor_id = #{doctorId}
+        ORDER BY status, create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM sys_consultation WHERE id = #{id}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE sys_consultation SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <update id="updateConsultationStatus">
+        UPDATE sys_appointment SET status = #{status} WHERE id = #{appointmentId}
+    </update>
+    <select id="countActiveConsultation" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_consultation
+        WHERE doctor_id = #{doctorId} AND patient_id = #{patientId} AND status != 2
+    </select>
+
+    <insert id="insertConsultation" parameterType="com.zjsru.entity.Consultation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_consultation
+        (appointment_id,patient_id, doctor_id, patient_name, doctor_name, content, status, create_time)
+        VALUES
+            (#{appointmentId},#{patientId}, #{doctorId}, #{patientName}, #{doctorName}, #{content}, #{status}, NOW())
+    </insert>
+
+</mapper>

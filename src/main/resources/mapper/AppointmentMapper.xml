@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.AppointmentMapper">
+
+    <!-- 1. 科室列表 -->
+    <select id="selectAllDepts" resultType="java.util.Map">
+        SELECT id, name FROM sys_dept ORDER BY id
+    </select>
+
+    <!-- 2. 医生列表 & 剩余号源计算 -->
+    <select id="selectDoctorSchedule" resultType="com.zjsru.entity.vo.AppointmentVO">
+        SELECT
+        d.id,
+        d.real_name AS realName,
+        d.title,
+        d.fee,
+        d.expertise,
+        s.name AS deptName,
+        (d.stock -
+        (SELECT COUNT(*)
+        FROM sys_appointment b
+        WHERE b.doctor_id = d.id
+        AND b.visit_date = #{date}
+        )) AS rest
+        FROM sys_doctor d
+        LEFT JOIN sys_dept s ON d.dept_id = s.id
+        <where>
+            <if test="deptName != null and !deptName.equals('0')">
+                AND s.name = #{deptName}
+            </if>
+        </where>
+    </select>
+
+    <!-- 3. 统计已用号源 -->
+    <select id="countAppointment" resultType="int">
+        SELECT COUNT(*) FROM sys_appointment
+        WHERE doctor_id = #{doctorId} AND visit_date = #{date}
+    </select>
+
+    <!-- 4. 查询医生总库存 -->
+    <select id="selectDoctorStock" resultType="java.lang.Integer">
+        SELECT stock FROM sys_doctor WHERE id = #{doctorId}
+    </select>
+
+    <!-- 5. 插入预约 -->
+    <insert id="insertAppointment" parameterType="com.zjsru.entity.Appointment">
+        INSERT INTO sys_appointment
+            (patient_id, doctor_id,dept_id, visit_date, time_slot,slot, create_time, status,fee)
+        VALUES
+            (#{patientId}, #{doctorId},#{deptId}, #{appointmentDate},#{timeSlot}, #{slot}, #{createTime}, #{status},#{fee})
+    </insert>
+
+</mapper>

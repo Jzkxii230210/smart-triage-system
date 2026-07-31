@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.MedicalRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.zjsru.entity.MedicalRecord">
+        <id column="id" property="id" />
+        <result column="patient_id" property="patientId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="doctor_name" property="doctorName" />
+        <result column="diagnosis" property="diagnosis" />
+        <result column="prescription" property="prescription" />
+        <result column="appointment_id" property="appointmentId" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 根据患者ID查询病历记录 -->
+    <select id="selectByPatientId" resultMap="BaseResultMap">
+        SELECT r.*, d.real_name as doctor_name
+        FROM sys_medical_record r
+                 LEFT JOIN sys_doctor d ON r.doctor_id = d.id
+        WHERE r.patient_id = #{patientId}
+        ORDER BY r.create_time DESC
+    </select>
+
+    <!-- 插入病历记录 -->
+    <insert id="insert" parameterType="com.zjsru.entity.MedicalRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_medical_record
+        (patient_id, doctor_id, doctor_name, diagnosis, prescription, appointment_id, create_time)
+        VALUES
+            (#{patientId}, #{doctorId}, #{doctorName}, #{diagnosis}, #{prescription}, #{appointmentId}, NOW())
+    </insert>
+
+    <!-- 根据ID更新病历记录 -->
+    <update id="updateById" parameterType="com.zjsru.entity.MedicalRecord">
+        UPDATE sys_medical_record
+        <set>
+            <if test="doctorId != null">doctor_id = #{doctorId},</if>
+            <if test="doctorName != null and doctorName != ''">doctor_name = #{doctorName},</if>
+            <if test="diagnosis != null and diagnosis != ''">diagnosis = #{diagnosis},</if>
+            <if test="prescription != null and prescription != ''">prescription = #{prescription},</if>
+            <if test="appointmentId != null">appointment_id = #{appointmentId},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除病历记录 -->
+    <delete id="deleteById">
+        DELETE FROM sys_medical_record WHERE id = #{id}
+    </delete>
+
+</mapper>

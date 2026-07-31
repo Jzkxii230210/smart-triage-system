@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.DoctorMapper">
+    <resultMap id="DoctorDTOMap" type="com.zjsru.entity.dto.DoctorDTO">
+        <id property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="realName" column="real_name"/>
+        <result property="title" column="title"/>
+        <result property="fee" column="fee"/>
+        <result property="stock" column="stock"/>
+        <result property="expertise" column="expertise"/>
+        <result property="deptName" column="dept_name"/>
+
+        <collection property="schedules" ofType="com.zjsru.entity.Schedule">
+            <id property="id" column="s_id"/>
+            <result property="workDate" column="s_date"/>
+            <result property="slot" column="s_slot"/>
+            <result property="maxNum" column="s_max"/>
+        </collection>
+    </resultMap>
+
+    <!-- 查询医生列表 -->
+    <select id="selectDoctorList" resultMap="DoctorDTOMap">
+        SELECT d.id,
+               d.dept_id,
+               d.real_name,
+               d.title,
+               d.fee,
+               d.stock,
+               d.expertise,
+               dept.name   AS dept_name,
+               s.id        AS s_id,
+               s.work_date AS s_date,
+               s.slot      AS s_slot,
+               s.max_num   AS s_max
+        FROM sys_doctor d
+                 LEFT JOIN sys_dept dept ON d.dept_id = dept.id
+                 LEFT JOIN sys_schedule s ON d.id = s.doctor_id
+            AND s.work_date >= CURDATE()
+        ORDER BY d.id, s.work_date
+    </select>
+
+    <!-- 1. 获取科室列表 -->
+    <select id="selectAllDeptNames" resultType="java.lang.String">
+        SELECT DISTINCT d.name
+        FROM sys_dept d
+        WHERE d.name IS NOT NULL AND d.name != ''
+    </select>
+
+    <!-- 2. 科室医生推荐 -->
+    <select id="selectSmartRecommendation" resultType="com.zjsru.entity.Doctor">
+        SELECT
+            t.id,
+            t.real_name as realName,
+            t.title,
+            t.expertise,
+            t.rating,
+            t.dept_id,
+            t.avatar,
+            d.name as deptName
+        FROM sys_doctor t
+                 LEFT JOIN sys_dept d ON t.dept_id = d.id
+        WHERE d.name = #{deptName}
+        ORDER BY
+            (CASE
+                 WHEN #{keyword} IS NOT NULL
+                     AND #{keyword} != ''
+                     AND t.expertise IS NOT NULL
+                     AND t.expertise LIKE CONCAT('%', #{keyword}, '%')
+                     THEN 1
+                 ELSE 0
+                END) DESC,
+            t.rating DESC
+    </select>
+
+    <select id="selectDoctorById" resultType="com.zjsru.entity.Doctor">
+        SELECT d.id, d.user_id as userId, d.dept_id as deptId, d.real_name as realName,
+               d.title, d.fee, d.stock, d.expertise, d.rating, d.avatar,
+               dept.name as deptName, dept.icon as deptIcon
+        FROM sys_doctor d
+                 LEFT JOIN sys_dept dept ON d.dept_id = dept.id
+        WHERE d.id = #{id}
+    </select>
+
+    <!-- 插入排班 -->
+    <insert id="insertSchedule">
+        INSERT INTO sys_schedule (doctor_id, work_date, slot, max_num)
+        VALUES (#{doctorId}, #{workDate}, #{slot}, #{maxNum})
+    </insert>
+
+    <!--  删除/取消排班 -->
+    <delete id="deleteScheduleById">
+        DELETE FROM sys_schedule WHERE id = #{id}
+    </delete>
+
+    <select id="selectDoctorWithDeptById" resultType="com.zjsru.entity.Doctor">
+        SELECT d.id, d.user_id, d.dept_id, d.real_name as realName, d.title, d.fee, d.stock,
+               d.expertise, d.rating, d.avatar, dept.name as deptName
+        FROM sys_doctor d
+                 LEFT JOIN sys_dept dept ON d.dept_id = dept.id
+        WHERE d.id = #{id}
+    </select>
+
+    <select id="findNameById" resultType="java.lang.String">
+        SELECT real_name FROM sys_doctor WHERE id = #{doctorId}
+    </select>
+
+    <select id="getAllDoctors" resultType="com.zjsru.entity.Doctor">
+        SELECT * FROM sys_doctor
+    </select>
+
+    <select id="getAllDoctorsWithExpertise" resultType="com.zjsru.entity.Doctor">
+        SELECT d.id, d.real_name, d.title, d.expertise, d.rating, d.dept_id, d.avatar,
+               dept.name as deptName
+        FROM sys_doctor d
+                 LEFT JOIN sys_dept dept ON d.dept_id = dept.id
+        WHERE d.expertise IS NOT NULL AND d.expertise != ''
+    </select>
+
+    <select id="getDoctorsByIds" resultType="com.zjsru.entity.Doctor">
+        SELECT d.id, d.real_name as realName, d.title, d.expertise, d.rating, d.dept_id, d.avatar,
+        dept.name as deptName
+        FROM sys_doctor d
+        LEFT JOIN sys_dept dept ON d.dept_id = dept.id
+        WHERE d.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findIdByUsername" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT id
+        FROM sys_doctor
+        WHERE username = #{username}
+    </select>
+
+</mapper>

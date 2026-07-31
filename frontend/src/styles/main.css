@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #303133;
+    -webkit-font-smoothing: antialiased;
+}
+
+.el-card {
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 20px;
+}
+
+.el-card__header {
+    padding: 15px 20px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+}
+
+.text-primary {
+    color: #409EFF;
+}
+
+.app-container {
+    padding: 20px;
+}
+
+.login-container, .dashboard, .triage-db {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

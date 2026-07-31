@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjsru.mapper.StatsMapper">
+
+    <!-- 通用结果映射 -->
+    <resultMap id="ChartDataMap" type="com.zjsru.entity.vo.StatsVO$ChartData">
+        <result property="name" column="name_label"/>
+        <result property="value" column="cnt_value"/>
+    </resultMap>
+
+    <!-- 1. 科室占比 -->
+    <select id="countByDept" resultMap="ChartDataMap">
+        SELECT
+            d.name AS name_label,
+            COUNT(a.id) AS cnt_value
+        FROM sys_appointment a
+                 LEFT JOIN sys_dept d ON a.dept_id = d.id
+        GROUP BY d.id, d.name
+        HAVING cnt_value > 0
+    </select>
+
+    <!-- 2. 近7日趋势 -->
+    <select id="countByDateTrend" resultMap="ChartDataMap">
+        SELECT DATE_FORMAT(create_time, '%Y-%m-%d') AS name_label,
+               COUNT(id)                            AS cnt_value
+        FROM sys_appointment
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY name_label
+    </select>
+
+    <!-- 3. 热门医生 -->
+    <select id="countByDoctorTop" resultMap="ChartDataMap">
+        SELECT
+            doc.real_name AS name_label,
+            COUNT(a.id) AS cnt_value
+        FROM sys_appointment a
+                 LEFT JOIN sys_doctor doc ON a.doctor_id = doc.id
+        GROUP BY doc.id, doc.real_name
+        ORDER BY cnt_value DESC
+        LIMIT 5
+    </select>
+
+</mapper>

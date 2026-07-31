@@ -131,7 +131,7 @@ VITE_API_BASE_URL=/api
 ```bash
 npm run dev
 ```
-启动后访问终端输出的本地地址（默认 `http://localhost:5173`）即可进入系统。
+启动后访问终端输出的本地地址（默认 `http://localhost:3000`）即可进入系统。
 
 - **构建生产环境包**
 ```bash
